@@ -64,7 +64,7 @@ def preprocess(img, min_size=600, max_size=1000):
     scale2 = max_size / max(H, W)
     scale = min(scale1, scale2)
     img = img / 255.
-    img = sktsf.resize(img, (C, H * scale, W * scale), mode='reflect',anti_aliasing=False)
+    img = sktsf.resize(img, (C, H * scale, W * scale), mode='reflect',anti_aliasing=False) # 对应的标注文件何时resize
     # both the longer and shorter should be less than
     # max_size and min_size
     if opt.caffe_pretrain:
@@ -80,13 +80,13 @@ class Transform(object):
         self.min_size = min_size
         self.max_size = max_size
 
-    def __call__(self, in_data):
+    def __call__(self, in_data):  # 使实例能够像函数一样被调用, 类似c++函数对象
         img, bbox, label = in_data
         _, H, W = img.shape
         img = preprocess(img, self.min_size, self.max_size)
         _, o_H, o_W = img.shape
         scale = o_H / H
-        bbox = util.resize_bbox(bbox, (H, W), (o_H, o_W))
+        bbox = util.resize_bbox(bbox, (H, W), (o_H, o_W))  # 此处 resize bbox
 
         # horizontally flip
         img, params = util.random_flip(

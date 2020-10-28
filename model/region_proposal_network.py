@@ -103,13 +103,13 @@ class RegionProposalNetwork(nn.Module):
             np.array(self.anchor_base),
             self.feat_stride, hh, ww)
 
-        n_anchor = anchor.shape[0] // (hh * ww)
+        n_anchor = anchor.shape[0] // (hh * ww)  # yao ,number of anchors per pixel of feature map
         h = F.relu(self.conv1(x))
 
         rpn_locs = self.loc(h)
         # UNNOTE: check whether need contiguous
         # A: Yes
-        rpn_locs = rpn_locs.permute(0, 2, 3, 1).contiguous().view(n, -1, 4)
+        rpn_locs = rpn_locs.permute(0, 2, 3, 1).contiguous().view(n, -1, 4)  # yao why
         rpn_scores = self.score(h)
         rpn_scores = rpn_scores.permute(0, 2, 3, 1).contiguous()
         rpn_softmax_scores = F.softmax(rpn_scores.view(n, hh, ww, n_anchor, 2), dim=4)
@@ -119,7 +119,7 @@ class RegionProposalNetwork(nn.Module):
 
         rois = list()
         roi_indices = list()
-        for i in range(n):
+        for i in range(n):    # yao n is batch size
             roi = self.proposal_layer(
                 rpn_locs[i].cpu().data.numpy(),
                 rpn_fg_scores[i].cpu().data.numpy(),

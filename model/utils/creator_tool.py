@@ -201,14 +201,14 @@ class AnchorTargetCreator(object):
         n_anchor = len(anchor)
         inside_index = _get_inside_index(anchor, img_H, img_W)
         anchor = anchor[inside_index]
-        argmax_ious, label = self._create_label(
+        argmax_ious, label = self._create_label(   #
             inside_index, anchor, bbox)
 
         # compute bounding box regression targets
-        loc = bbox2loc(anchor, bbox[argmax_ious])
+        loc = bbox2loc(anchor, bbox[argmax_ious])  # loc 不是都有效的？  (src_bbox, dst_bbox)
 
         # map up to original set of anchors
-        label = _unmap(label, n_anchor, inside_index, fill=-1)
+        label = _unmap(label, n_anchor, inside_index, fill=-1)  #_unmap(data, count, index, fill=0)
         loc = _unmap(loc, n_anchor, inside_index, fill=0)
 
         return loc, label
@@ -250,8 +250,8 @@ class AnchorTargetCreator(object):
 
     def _calc_ious(self, anchor, bbox, inside_index):
         # ious between the anchors and the gt boxes
-        ious = bbox_iou(anchor, bbox)
-        argmax_ious = ious.argmax(axis=1)
+        ious = bbox_iou(anchor, bbox)   # (N ,K)
+        argmax_ious = ious.argmax(axis=1)   # 每行最大值  ,与anchor 最大iou的bbox
         max_ious = ious[np.arange(len(inside_index)), argmax_ious]
         gt_argmax_ious = ious.argmax(axis=0)
         gt_max_ious = ious[gt_argmax_ious, np.arange(ious.shape[1])]
