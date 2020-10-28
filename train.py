@@ -125,6 +125,6 @@ def train(**kwargs):
 
 
 if __name__ == '__main__':
-    import fire   # 生成命令行界面
+    import fire   # 生成命令行界 面
 
     fire.Fire()
