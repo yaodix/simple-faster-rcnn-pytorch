@@ -119,7 +119,7 @@ class RegionProposalNetwork(nn.Module):
 
         rois = list()
         roi_indices = list()
-        for i in range(n):    # yao n is batch size
+        for i in range(n):    # yao :n is batch size
             roi = self.proposal_layer(
                 rpn_locs[i].cpu().data.numpy(),
                 rpn_fg_scores[i].cpu().data.numpy(),

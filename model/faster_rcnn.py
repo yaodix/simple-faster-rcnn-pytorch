@@ -230,7 +230,7 @@ class FasterRCNN(nn.Module):
         for img, size in zip(prepared_imgs, sizes):
             img = at.totensor(img[None]).float()
             scale = img.shape[3] / size[1]
-            roi_cls_loc, roi_scores, rois, _ = self(img, scale=scale)
+            roi_cls_loc, roi_scores, rois, _ = self(img, scale=scale)  #
             # We are assuming that batch size is 1.
             roi_score = roi_scores.data
             roi_cls_loc = roi_cls_loc.data

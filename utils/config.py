@@ -6,12 +6,12 @@ from pprint import pprint
 # e.g. --voc-data-dir='./data/'
 
 class Config:
-    # data
-    voc_data_dir = '/dataset/PASCAL2007/VOC2007/'
+    # data  ,不加self表示类的一个属性，加了是类的实列的属性
+    voc_data_dir = 'C:\\MyData\\voc\\VOCdevkit\\VOC2007'
     min_size = 600  # image resize
     max_size = 1000 # image resize
-    num_workers = 8
-    test_num_workers = 8
+    num_workers = 1
+    test_num_workers = 1
 
     # sigma for l1_smooth_loss
     rpn_sigma = 3.
@@ -41,7 +41,7 @@ class Config:
     use_chainer = False # try match everything as chainer
     use_drop = False # use dropout in RoIHead
     # debug
-    debug_file = '/tmp/debugf'
+    debug_file = 'c:/tmp/debugf'
 
     test_num = 10000
     # model
@@ -61,7 +61,7 @@ class Config:
         pprint(self._state_dict())
         print('==========end============')
 
-    def _state_dict(self):
+    def _state_dict(self):  # 类的静态函数、类函数、普通函数、全局变量以及一些内置的属性都是放在类__dict__
         return {k: getattr(self, k) for k, _ in Config.__dict__.items() \
                 if not k.startswith('_')}
 

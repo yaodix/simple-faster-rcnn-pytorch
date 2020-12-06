@@ -19,7 +19,7 @@ def decom_vgg16():
     else:
         model = vgg16(not opt.load_path)
 
-    features = list(model.features)[:30]
+    features = list(model.features)[:30]  # del last maxpool layer
     classifier = model.classifier
 
     classifier = list(classifier)
@@ -76,7 +76,7 @@ class FasterRCNNVGG16(FasterRCNN):
             spatial_scale=(1. / self.feat_stride),
             classifier=classifier
         )
-
+        # super() is only useful if you subclass
         super(FasterRCNNVGG16, self).__init__(
             extractor,
             rpn,
@@ -135,7 +135,7 @@ class VGG16RoIHead(nn.Module):
         # in case roi_indices is  ndarray
         roi_indices = at.totensor(roi_indices).float()
         rois = at.totensor(rois).float()
-        indices_and_rois = t.cat([roi_indices[:, None], rois], dim=1)
+        indices_and_rois = t.cat([roi_indices[:, None], rois], dim=1)  #
         # NOTE: important: yx->xy
         xy_indices_and_rois = indices_and_rois[:, [0, 2, 1, 4, 3]]
         indices_and_rois =  xy_indices_and_rois.contiguous()

@@ -80,7 +80,7 @@ class Transform(object):
         self.min_size = min_size
         self.max_size = max_size
 
-    def __call__(self, in_data):  # 使实例能够像函数一样被调用, 类似c++函数对象
+    def __call__(self, in_data):  # __cal__使实例能够像函数一样被调用, 类似c++函数对象
         img, bbox, label = in_data
         _, H, W = img.shape
         img = preprocess(img, self.min_size, self.max_size)

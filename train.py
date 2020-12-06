@@ -16,10 +16,10 @@ from utils.eval_tool import eval_detection_voc
 
 # fix for ulimit
 # https://github.com/pytorch/pytorch/issues/973#issuecomment-346405667
-import resource
+# import resource
 
-rlimit = resource.getrlimit(resource.RLIMIT_NOFILE)
-resource.setrlimit(resource.RLIMIT_NOFILE, (20480, rlimit[1]))
+# rlimit = resource.getrlimit(resource.RLIMIT_NOFILE)
+# resource.setrlimit(resource.RLIMIT_NOFILE, (20480, rlimit[1]))
 
 matplotlib.use('agg')
 
@@ -46,7 +46,7 @@ def eval(dataloader, faster_rcnn, test_num=10000):
 
 
 def train(**kwargs):
-    opt._parse(kwargs)
+    opt._parse(kwargs)  # opt = config()
 
     dataset = Dataset(opt)
     print('load data')
@@ -62,7 +62,7 @@ def train(**kwargs):
                                        shuffle=False, \
                                        pin_memory=True
                                        )
-    faster_rcnn = FasterRCNNVGG16()
+    faster_rcnn = FasterRCNNVGG16()   # 模型结构
     print('model construct completed')
     trainer = FasterRCNNTrainer(faster_rcnn).cuda()
     if opt.load_path:
@@ -127,4 +127,6 @@ def train(**kwargs):
 if __name__ == '__main__':
     import fire   # 生成命令行界 面
 
-    fire.Fire()
+    param =['--env','fasterrcnn','--plot_every','100']
+
+    fire.Fire(train,param)

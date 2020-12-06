@@ -2,7 +2,7 @@ import numpy as np
 import torch
 from torchvision.ops import nms
 from model.utils.bbox_tools import bbox2loc, bbox_iou, loc2bbox
-
+import copy
 
 class ProposalTargetCreator(object):
     """Assign ground truth bounding boxes to given RoIs.
@@ -93,12 +93,12 @@ class ProposalTargetCreator(object):
         roi = np.concatenate((roi, bbox), axis=0)
 
         pos_roi_per_image = np.round(self.n_sample * self.pos_ratio)
-        iou = bbox_iou(roi, bbox)
-        gt_assignment = iou.argmax(axis=1)
+        iou = bbox_iou(roi, bbox)  # (N, K)
+        gt_assignment = iou.argmax(axis=1)  # 每行最大值索引，
         max_iou = iou.max(axis=1)
         # Offset range of classes from [0, n_fg_class - 1] to [1, n_fg_class].
         # The label with value 0 is the background.
-        gt_roi_label = label[gt_assignment] + 1
+        gt_roi_label = label[gt_assignment] + 1  # 最大iou的box最为目标
 
         # Select foreground RoIs as those with >= pos_iou_thresh IoU.
         pos_index = np.where(max_iou >= self.pos_iou_thresh)[0]
@@ -200,12 +200,12 @@ class AnchorTargetCreator(object):
 
         n_anchor = len(anchor)
         inside_index = _get_inside_index(anchor, img_H, img_W)
-        anchor = anchor[inside_index]
-        argmax_ious, label = self._create_label(   #
+        anchor = anchor[inside_index]   # 有效anchor
+        argmax_ious, label = self._create_label(   # label对应256个有效anchor的标签
             inside_index, anchor, bbox)
 
         # compute bounding box regression targets
-        loc = bbox2loc(anchor, bbox[argmax_ious])  # loc 不是都有效的？  (src_bbox, dst_bbox)
+        loc = bbox2loc(anchor, bbox[argmax_ious])  # 计算所有 anchor 对应box的偏移 ，用于训练
 
         # map up to original set of anchors
         label = _unmap(label, n_anchor, inside_index, fill=-1)  #_unmap(data, count, index, fill=0)
@@ -250,13 +250,14 @@ class AnchorTargetCreator(object):
 
     def _calc_ious(self, anchor, bbox, inside_index):
         # ious between the anchors and the gt boxes
-        ious = bbox_iou(anchor, bbox)   # (N ,K)
-        argmax_ious = ious.argmax(axis=1)   # 每行最大值  ,与anchor 最大iou的bbox
-        max_ious = ious[np.arange(len(inside_index)), argmax_ious]
-        gt_argmax_ious = ious.argmax(axis=0)
-        gt_max_ious = ious[gt_argmax_ious, np.arange(ious.shape[1])]
-        gt_argmax_ious = np.where(ious == gt_max_ious)[0]
-
+        ious = bbox_iou(anchor, bbox)                                # (N ,K) ,N -> order of anchors
+        argmax_ious = ious.argmax(axis=1)                            # 每行最大值 在哪一列,与anchor 最大iou的bbox
+        max_ious = ious[np.arange(len(inside_index)), argmax_ious]   # 每个anchor的最大iou
+        gt_argmax_ious = ious.argmax(axis=0)                          # 每列最大值 在哪一行，与gt 最大IOU的anchor
+        tmp = copy.deepcopy(gt_argmax_ious)
+        gt_max_ious = ious[gt_argmax_ious, np.arange(ious.shape[1])]  # 最大的具体值
+        gt_argmax_ious = np.where(ious == gt_max_ious)[0]             # 最大值对应的行位置，即第几个anchor
+        # e = np.equal(tmp,gt_argmax_ious)
         return argmax_ious, max_ious, gt_argmax_ious
 
 
